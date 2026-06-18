@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, computed_field
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal
 import pickle
 import pandas as pd
 
-with open('model.pkl','rb') as f:
-    model=pickle.load(f)
-
+# Load the updated version of your model pipeline
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
 app = FastAPI()
 
@@ -25,17 +25,15 @@ class UserInput(BaseModel):
     age: Annotated[int, Field(..., gt=0, lt=120, description='Age of the patient')]
     weight: Annotated[float, Field(..., gt=0, description='Weight of the patient in kgs')]
     height: Annotated[float, Field(..., gt=0, description='Height of the patient in mtrs')]
-    income_lpa:Annotated[float,Field(...,gt=0,description='Annual Salary of the user in LPA')]
-    smoker:Annotated[bool,Field(...,description='Is user a smoker')]
+    income_lpa: Annotated[float, Field(..., gt=0, description='Annual Salary of the user in LPA')]
+    smoker: Annotated[bool, Field(..., description='Is user a smoker')]
     city: Annotated[str, Field(..., description='City where the user is living')]
-    occupation:Annotated[Literal['retired','freelancer','student','government_job','business_owner','unemployed','private_job'],Field(...,description='Occupation of the user')]
-   
+    occupation: Annotated[Literal['retired','freelancer','student','government_job','business_owner','unemployed','private_job'], Field(..., description='Occupation of the user')]
 
     @computed_field
     @property
     def bmi(self) -> float:
-        bmi = round(self.weight/(self.height**2),2)
-        return bmi
+        return round(self.weight / (self.height ** 2), 2)
     
     @computed_field
     @property
@@ -44,12 +42,11 @@ class UserInput(BaseModel):
             return "high"
         elif self.smoker or self.bmi > 27:
             return "medium"
-        else:
-            return "low"
+        return "low"
         
     @computed_field
     @property
-    def age_group(self)->str:
+    def age_group(self) -> str:
         if self.age < 25:
             return "young"
         elif self.age < 45:
@@ -60,26 +57,29 @@ class UserInput(BaseModel):
     
     @computed_field
     @property
-    def city_tier(self)->int:
+    def city_tier(self) -> int:
+        # Kept as int to match your training logic
         if self.city in tier_1_cities:
-              return 1
+            return 1
         elif self.city in tier_2_cities:
             return 2
-        else:
-            return 3
+        return 3
 
-        
 @app.post('/predict')
-def predict_premium(data:UserInput):
-    input_df=pd.DataFrame([{
-        'bmi':data.bmi,
-        'age_group':data.age_group,
-        'lifestyle_risk':data.lifestyle_risk,
-        'city_tier':data.city_tier,
-        'income_lpa':data.income_lpa,
-        'occupation':data.occupation
+def predict_premium(data: UserInput):
+    # Constructing dataframe with exact order and feature names matched to training X matrix
+    input_df = pd.DataFrame([{
+        'bmi': data.bmi,
+        'age_group': data.age_group,
+        'lifestyle_risk': data.lifestyle_risk,
+        'city_tier': data.city_tier,
+        'income_lpa': data.income_lpa,
+        'occupation': data.occupation
     }])
 
-    prediction=model.predict(input_df)[0]
+    # Columns must exactly mirror the training sequence order
+    feature_order = ["bmi", "age_group", "lifestyle_risk", "city_tier", "income_lpa", "occupation"]
+    input_df = input_df[feature_order]
 
-    return JSONResponse(status_code=200,content={'response':prediction})
+    prediction = model.predict(input_df)[0]
+    return JSONResponse(status_code=200, content={'response': str(prediction)})

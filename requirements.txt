@@ -1,10 +1,10 @@
-fastapi 
-uvicorn 
-streamlit 
-requests 
-scikit-learn 
-joblib
+fastapi
+uvicorn
+streamlit
+requests
+scikit-learn
 pydantic>=2.0
 pandas
 numpy
-
+matplotlib
+seaborn
