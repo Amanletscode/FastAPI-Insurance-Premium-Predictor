@@ -58,10 +58,12 @@ class UserInput(BaseModel):
     @computed_field
     @property
     def city_tier(self) -> int:
-        # Kept as int to match your training logic
-        if self.city in tier_1_cities:
+        # Converts input text safely to Title Case (e.g., "delhi" -> "Delhi")
+        formatted_city = self.city.strip().title()
+        
+        if formatted_city in tier_1_cities:
             return 1
-        elif self.city in tier_2_cities:
+        elif formatted_city in tier_2_cities:
             return 2
         return 3
 
