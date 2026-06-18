@@ -6,13 +6,24 @@ API_URL = "https://fastapi-insurance-premium-predictor-x5b8.onrender.com/predict
 st.title("Insurance Premium Category Predictor")
 st.markdown("Enter your details below:")
 
+# Fixed: Explicit declaration of cities_list to resolve NameError
+cities_list = [
+    "Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune",
+    "Jaipur", "Chandigarh", "Indore", "Lucknow", "Patna", "Ranchi", "Visakhapatnam", "Coimbatore",
+    "Bhopal", "Nagpur", "Vadodara", "Surat", "Rajkot", "Jodhpur", "Raipur", "Amritsar", "Varanasi",
+    "Agra", "Dehradun", "Mysore", "Jabalpur", "Guwahati", "Thiruvananthapuram", "Ludhiana", "Nashik",
+    "Allahabad", "Udaipur", "Aurangabad", "Hubli", "Belgaum", "Salem", "Vijayawada", "Tiruchirappalli",
+    "Bhavnagar", "Gwalior", "Dhanbad", "Bareilly", "Aligarh", "Gaya", "Kozhikode", "Warangal",
+    "Kolhapur", "Bilaspur", "Jalandhar", "Noida", "Guntur", "Asansol", "Siliguri", "Other"
+]
+
 # Input fields
 age = st.number_input("Age", min_value=1, max_value=119, value=30)
 weight = st.number_input("Weight (kg)", min_value=1.0, value=65.0)
 height = st.number_input("Height (m)", min_value=0.5, max_value=2.5, value=1.7)
 income_lpa = st.number_input("Annual Income (LPA)", min_value=0.1, value=10.0)
 smoker = st.selectbox("Are you a smoker?", options=[True, False])
-city = st.selectbox("City", options=cities_list, index=0) # Dropdown selection
+city = st.selectbox("City", options=cities_list, index=0) # Handled dropdown selection smoothly
 occupation = st.selectbox(
     "Occupation",
     ['retired', 'freelancer', 'student', 'government_job', 'business_owner', 'unemployed', 'private_job']
